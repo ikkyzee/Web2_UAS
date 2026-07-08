@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Data Stock Gudang - Login</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-blue: #0d6efd;
+            --dark-steel: #212529;
+            --logistics-orange: #fd7e14;
+            --off-white: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--off-white);
+            color: var(--dark-steel);
+            overflow-x: hidden;
+        }
+
+        .brand-font {
+            font-family: 'Inter', sans-serif;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        /* Split Screen Layout */
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .auth-image {
+            width: 55%;
+            /* Image of a modern warehouse / racks */
+            background-image: url('https://images.unsplash.com/photo-1586528116311-ad8ed7c83a75?q=80&w=2000&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .auth-image::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to bottom, rgba(33, 37, 41, 0.4), rgba(33, 37, 41, 0.9));
+        }
+
+        .auth-image-content {
+            position: absolute;
+            bottom: 10%;
+            left: 10%;
+            z-index: 2;
+            color: white;
+            max-width: 80%;
+        }
+
+        .auth-form-wrapper {
+            width: 45%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem;
+            background-color: white;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .auth-form-inner {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        /* Form Controls */
+        .form-control {
+            background-color: #f1f3f5;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus {
+            box-shadow: none;
+            border-color: var(--primary-blue);
+            background-color: white;
+        }
+
+        .form-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--dark-steel);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        /* Buttons */
+        .btn-gold { /* Overriding btn-gold from previous theme to use primary blue */
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            font-weight: 700;
+            padding: 14px 20px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-gold:hover {
+            background-color: #0b5ed7;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(13, 110, 253, 0.2);
+        }
+
+        .auth-link {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        
+        .auth-link:hover {
+            color: var(--logistics-orange);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 991px) {
+            .auth-image { display: none; }
+            .auth-form-wrapper { width: 100%; padding: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <!-- Left Side: Warehouse Image -->
+        <div class="auth-image">
+            <div class="auth-image-content">
+                <div class="mb-3">
+                    <span class="badge bg-primary px-3 py-2 text-uppercase tracking-wide" style="letter-spacing: 1px;">Sistem Informasi</span>
+                </div>
+                <h1 class="display-4 mb-3 brand-font">Data Stock<br><span style="color: var(--logistics-orange);">Gudang</span></h1>
+                <p class="lead fw-normal opacity-75 border-start border-4 border-warning ps-3">Platform manajemen dan pencatatan sirkulasi gudang secara terpusat, memantau *inbound* dan *outbound* secara real-time.</p>
+            </div>
+        </div>
+        
+        <!-- Right Side: Form -->
+        <div class="auth-form-wrapper shadow-lg">
+            <div class="auth-form-inner">
+                {{ $slot }}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
