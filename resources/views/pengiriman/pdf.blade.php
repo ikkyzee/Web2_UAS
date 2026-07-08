@@ -44,7 +44,7 @@
                 <td>
                     <ul style="margin:0; padding-left:15px;">
                         @foreach($pengiriman->detailPengirimans as $detail)
-                            <li>{{ $detail->roll->nomor_roll }} - {{ $detail->roll->barang->nama_barang }} ({{ $detail->roll->berat_kg }} Kg)</li>
+                            <li>{{ $detail->barang->kode_barang }} (Roll: {{ $detail->barang->penerimaanRoll->nomor_roll ?? '-' }}) - {{ $detail->barang->kategori->nama_kategori ?? '-' }} ({{ $detail->barang->penerimaanRoll->kiloan ?? 0 }} Kg)</li>
                         @endforeach
                     </ul>
                 </td>

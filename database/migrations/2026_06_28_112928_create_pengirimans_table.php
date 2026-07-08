@@ -14,8 +14,8 @@ return new class extends Migration
             $table->foreignId('toko_id')->constrained('tokos')->cascadeOnDelete();
             $table->foreignId('armada_id')->constrained('armadas')->cascadeOnDelete();
             $table->date('tanggal_kirim');
-            $table->dateTime('tanggal_diterima')->nullable();
             $table->enum('status', ['diproses', 'dikirim', 'diterima'])->default('diproses');
+            $table->timestamp('tanggal_diterima')->nullable();
             $table->timestamps();
         });
     }

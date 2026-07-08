@@ -25,15 +25,23 @@ Route::middleware('auth')->group(function () {
 
     // Role-based Access Control untuk Data Master
     // Hanya Admin dan Petugas yang bisa mengelola data master
-    Route::middleware('role:admin,petugas')->group(function () {
+    Route::middleware('role:admin,admin_pusat')->group(function () {
         Route::resource('kategoris', KategoriController::class);
         Route::resource('tokos', TokoController::class);
         Route::resource('armadas', ArmadaController::class);
-        Route::resource('barangs', BarangController::class);
+        Route::resource('barangs', BarangController::class)->except(['index']);
         Route::resource('suppliers', App\Http\Controllers\SupplierController::class);
-        Route::resource('barang-masuks', App\Http\Controllers\BarangMasukController::class);
-        Route::get('/laporan-stok', [App\Http\Controllers\LaporanController::class, 'stok'])->name('laporan.stok');
-        Route::get('/laporan-stok/export/csv', [App\Http\Controllers\LaporanController::class, 'exportStokCsv'])->name('laporan.export.csv');
+        Route::resource('penerimaans', App\Http\Controllers\PenerimaanController::class);
+        Route::get('/api/oc-rolls/{id}', [App\Http\Controllers\BarangController::class, 'getRollsByOc']);
+    });
+
+    // Read access for admin, admin_pusat, admin_toko
+    Route::middleware('role:admin,admin_pusat,admin_toko')->group(function () {
+        Route::get('barangs', [BarangController::class, 'index'])->name('barangs.index');
+        
+        Route::get('/laporan-stok', [App\Http\Controllers\LaporanController::class, 'index'])->name('laporan.index');
+        Route::get('/laporan-stok/export/excel', [App\Http\Controllers\LaporanController::class, 'exportExcel'])->name('laporan.export.excel');
+        Route::get('/laporan-stok/export/pdf', [App\Http\Controllers\LaporanController::class, 'exportPdf'])->name('laporan.export.pdf');
     });
 
     // Hanya Admin yang bisa mengelola User
@@ -41,7 +49,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('users', App\Http\Controllers\UserController::class);
     });
 
-    // Transaksi Pengiriman (Bisa diakses admin, petugas, admin_toko, filter di Controller)
+    // Transaksi Pengiriman (Bisa diakses admin, admin_pusat, admin_toko, filter di Controller)
     Route::get('/pengirimans/export/pdf', [App\Http\Controllers\PengirimanController::class, 'exportPdf'])->name('pengirimans.export.pdf');
     Route::get('/pengirimans/export/excel', [App\Http\Controllers\PengirimanController::class, 'exportExcel'])->name('pengirimans.export.excel');
     Route::resource('pengirimans', App\Http\Controllers\PengirimanController::class);

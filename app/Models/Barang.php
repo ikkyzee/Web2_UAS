@@ -2,34 +2,32 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Barang extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['kategori_id', 'kode_barang', 'nama_barang', 'ukuran', 'warna'];
+    protected $guarded = ['id'];
+
+    public function penerimaan()
+    {
+        return $this->belongsTo(Penerimaan::class);
+    }
+
+    public function penerimaanRoll()
+    {
+        return $this->belongsTo(PenerimaanRoll::class);
+    }
 
     public function kategori()
     {
         return $this->belongsTo(Kategori::class);
     }
 
-    public function rolls()
+    public function detailPengirimans()
     {
-        return $this->hasMany(Roll::class);
-    }
-
-    public function getStokKiloanAttribute()
-    {
-        return $this->rolls()->where('status', 'di_gudang')->sum('berat_kg');
-    }
-
-    public function pengirimans()
-    {
-        return $this->belongsToMany(Pengiriman::class, 'detail_pengirimans')
-                    ->withPivot('jumlah_kiloan')
-                    ->withTimestamps();
+        return $this->hasMany(DetailPengiriman::class);
     }
 }

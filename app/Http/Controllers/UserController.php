@@ -43,8 +43,10 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|in:admin,petugas,admin_toko',
+            'role' => 'required|in:admin,admin_pusat,admin_toko',
             'toko_id' => 'nullable|exists:tokos,id',
+        ], [
+            'email.unique' => 'Alamat email ini sudah digunakan oleh akun lain. Silakan gunakan email yang berbeda.',
         ]);
 
         User::create([
@@ -70,8 +72,10 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:8|confirmed',
-            'role' => 'required|in:admin,petugas,admin_toko',
+            'role' => 'required|in:admin,admin_pusat,admin_toko',
             'toko_id' => 'nullable|exists:tokos,id',
+        ], [
+            'email.unique' => 'Alamat email ini sudah terdaftar. Silakan gunakan email lain.',
         ]);
 
         $data = [

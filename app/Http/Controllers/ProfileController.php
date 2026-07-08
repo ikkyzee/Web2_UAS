@@ -32,6 +32,15 @@ class ProfileController extends Controller
             $request->user()->email_verified_at = null;
         }
 
+        if ($request->hasFile('photo')) {
+            // Hapus foto lama jika ada
+            if ($request->user()->photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($request->user()->photo)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($request->user()->photo);
+            }
+            $path = $request->file('photo')->store('profile-photos', 'public');
+            $request->user()->photo = $path;
+        }
+
         $request->user()->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');

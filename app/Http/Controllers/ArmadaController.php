@@ -33,6 +33,8 @@ class ArmadaController extends Controller
             'plat_nomor' => 'required|string|max:20|unique:armadas,plat_nomor',
             'jenis_kendaraan' => 'required|string|max:100',
             'nama_supir' => 'required|string|max:255',
+        ], [
+            'plat_nomor.unique' => 'Plat nomor ini sudah terdaftar di sistem. Silakan gunakan plat nomor yang berbeda.',
         ]);
 
         Armada::create($request->all());
@@ -50,6 +52,8 @@ class ArmadaController extends Controller
             'plat_nomor' => 'required|string|max:20|unique:armadas,plat_nomor,'.$armada->id,
             'jenis_kendaraan' => 'required|string|max:100',
             'nama_supir' => 'required|string|max:255',
+        ], [
+            'plat_nomor.unique' => 'Plat nomor ini sudah terdaftar di sistem. Silakan gunakan plat nomor yang berbeda.',
         ]);
 
         $armada->update($request->all());

@@ -6,19 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->foreignId('toko_id')->nullable()->constrained('tokos')->nullOnDelete();
-            $table->enum('role', ['admin', 'admin_pusat', 'admin_toko'])->default('admin_pusat');
+            $table->string('photo')->nullable()->after('email');
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropForeign(['toko_id']);
-            $table->dropColumn(['toko_id', 'role']);
+            $table->dropColumn('photo');
         });
     }
 };

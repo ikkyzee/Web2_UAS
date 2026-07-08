@@ -16,6 +16,15 @@
     <!-- FontAwesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
+    <script>
+        // Check local storage for theme
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
     <style>
         :root {
             --primary-blue: #0d6efd;
@@ -84,18 +93,19 @@
             max-width: 420px;
         }
 
-        /* Form Controls */
+        /* Form Controls - Improved Visibility */
         .form-control {
-            background-color: #f1f3f5;
-            border: 2px solid transparent;
+            background-color: #ffffff;
+            border: 2px solid #adb5bd;
             border-radius: 8px;
             padding: 12px 16px;
             font-size: 0.95rem;
             transition: all 0.2s;
+            color: var(--dark-steel);
         }
 
         .form-control:focus {
-            box-shadow: none;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
             border-color: var(--primary-blue);
             background-color: white;
         }
@@ -107,6 +117,56 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 8px;
+        }
+
+        /* Dark Mode Overrides */
+        html.dark body {
+            background-color: #121212;
+            color: #f8f9fa;
+        }
+        
+        html.dark .auth-form-wrapper {
+            background-color: #1e1e1e;
+        }
+        
+        html.dark .form-control {
+            background-color: #2b2b2b;
+            border-color: #6c757d;
+            color: #ffffff;
+        }
+        
+        html.dark .form-control:focus {
+            background-color: #1e1e1e;
+            border-color: var(--primary-blue);
+            color: #ffffff;
+        }
+        
+        html.dark .form-label {
+            color: #adb5bd;
+        }
+        
+        html.dark h2, html.dark h3, html.dark h4, html.dark h5 {
+            color: #ffffff !important;
+        }
+        
+        html.dark p, html.dark .text-muted {
+            color: #ced4da !important;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--dark-steel);
+            cursor: pointer;
+            z-index: 10;
+        }
+        html.dark .theme-toggle-btn {
+            color: #f8f9fa;
         }
 
         /* Buttons */
@@ -165,11 +225,42 @@
         </div>
         
         <!-- Right Side: Form -->
-        <div class="auth-form-wrapper shadow-lg">
+        <div class="auth-form-wrapper shadow-lg position-relative">
+            <button id="guest-theme-toggle" class="theme-toggle-btn">
+                <i id="theme-icon-dark" class="fas fa-moon d-none"></i>
+                <i id="theme-icon-light" class="fas fa-sun d-none"></i>
+            </button>
             <div class="auth-form-inner">
                 {{ $slot }}
             </div>
         </div>
     </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleBtn = document.getElementById('guest-theme-toggle');
+            const iconDark = document.getElementById('theme-icon-dark');
+            const iconLight = document.getElementById('theme-icon-light');
+            
+            if (document.documentElement.classList.contains('dark')) {
+                iconLight.classList.remove('d-none');
+            } else {
+                iconDark.classList.remove('d-none');
+            }
+            
+            toggleBtn.addEventListener('click', function() {
+                iconDark.classList.toggle('d-none');
+                iconLight.classList.toggle('d-none');
+                
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

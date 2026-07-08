@@ -12,7 +12,8 @@ class SupplierController extends Controller
         $search = $request->search;
         $suppliers = Supplier::when($search, function ($query, $search) {
                 return $query->where('nama_supplier', 'like', "%{$search}%")
-                             ->orWhere('kontak', 'like', "%{$search}%")
+                             ->orWhere('kontak_person', 'like', "%{$search}%")
+                             ->orWhere('no_telepon', 'like', "%{$search}%")
                              ->orWhere('alamat', 'like', "%{$search}%");
             })
             ->latest()

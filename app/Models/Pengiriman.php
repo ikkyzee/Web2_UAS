@@ -2,16 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Pengiriman extends Model
 {
     use HasFactory;
 
     protected $table = 'pengirimans';
-
-    protected $fillable = ['user_id', 'toko_id', 'armada_id', 'tanggal_kirim', 'tanggal_diterima', 'status'];
+    protected $guarded = ['id'];
 
     public function user()
     {
@@ -31,12 +30,5 @@ class Pengiriman extends Model
     public function detailPengirimans()
     {
         return $this->hasMany(DetailPengiriman::class);
-    }
-
-    public function barangs()
-    {
-        return $this->belongsToMany(Barang::class, 'detail_pengirimans')
-                    ->withPivot('jumlah_kiloan')
-                    ->withTimestamps();
     }
 }

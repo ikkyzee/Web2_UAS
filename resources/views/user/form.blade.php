@@ -4,63 +4,55 @@
 @section('page_heading', isset($user) ? 'Edit User' : 'Tambah User')
 
 @section('content')
-<div class="row">
-    <div class="col-md-8">
-        <div class="card shadow-sm border-0">
-            <div class="card-body p-4">
-                <form action="{{ isset($user) ? route('users.update', $user->id) : route('users.store') }}" method="POST">
-                    @csrf
-                    @if(isset($user))
-                        @method('PUT')
-                    @endif
+<div class="max-w-4xl" x-data="{ role: '{{ old('role', $user->role ?? '') }}' }">
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 overflow-hidden">
+        <div class="p-6">
+            <form action="{{ isset($user) ? route('users.update', $user->id) : route('users.store') }}" method="POST">
+                @csrf
+                @if(isset($user))
+                    @method('PUT')
+                @endif
 
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="name" class="form-label fw-bold">Nama Lengkap <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $user->name ?? '') }}" required>
-                            @error('name')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Nama Lengkap <span class="text-red-500">*</span></label>
+                            <input type="text" name="name" value="{{ old('name', $user->name ?? '') }}" required 
+                                class="mt-1 focus:ring-brand-500 focus:border-brand-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                         </div>
-                        <div class="col-md-6">
-                            <label for="email" class="form-label fw-bold">Alamat Email <span class="text-danger">*</span></label>
-                            <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email', $user->email ?? '') }}" required>
-                            @error('email')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Alamat Email <span class="text-red-500">*</span></label>
+                            <input type="email" name="email" value="{{ old('email', $user->email ?? '') }}" required 
+                                class="mt-1 focus:ring-brand-500 focus:border-brand-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                         </div>
                     </div>
 
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="password" class="form-label fw-bold">Password {{ isset($user) ? '(Kosongkan jika tidak diubah)' : '*' }}</label>
-                            <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" {{ isset($user) ? '' : 'required' }}>
-                            @error('password')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Password {{ isset($user) ? '(Kosongkan jika tidak diubah)' : '*' }}</label>
+                            <input type="password" name="password" {{ isset($user) ? '' : 'required' }} 
+                                class="mt-1 focus:ring-brand-500 focus:border-brand-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                         </div>
-                        <div class="col-md-6">
-                            <label for="password_confirmation" class="form-label fw-bold">Konfirmasi Password</label>
-                            <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" {{ isset($user) ? '' : 'required' }}>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Konfirmasi Password {{ isset($user) ? '(Kosongkan jika tidak diubah)' : '*' }}</label>
+                            <input type="password" name="password_confirmation" {{ isset($user) ? '' : 'required' }} 
+                                class="mt-1 focus:ring-brand-500 focus:border-brand-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                         </div>
                     </div>
 
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label for="role" class="form-label fw-bold">Role Akses <span class="text-danger">*</span></label>
-                            <select class="form-select @error('role') is-invalid @enderror" id="role" name="role" required onchange="toggleToko(this.value)">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Role Akses <span class="text-red-500">*</span></label>
+                            <select name="role" x-model="role" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm">
                                 <option value="">-- Pilih Role --</option>
-                                <option value="admin" {{ old('role', $user->role ?? '') == 'admin' ? 'selected' : '' }}>Admin Pusat</option>
-                                <option value="petugas" {{ old('role', $user->role ?? '') == 'petugas' ? 'selected' : '' }}>Petugas Gudang</option>
-                                <option value="admin_toko" {{ old('role', $user->role ?? '') == 'admin_toko' ? 'selected' : '' }}>Admin Toko</option>
+                                <option value="admin">Admin Pusat</option>
+                                <option value="admin_pusat">Admin Pusat (Petugas Gudang)</option>
+                                <option value="admin_toko">Admin Toko</option>
                             </select>
-                            @error('role')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
                         </div>
-                        <div class="col-md-6" id="toko_wrapper" style="display: {{ old('role', $user->role ?? '') == 'admin_toko' ? 'block' : 'none' }};">
-                            <label for="toko_id" class="form-label fw-bold">Pilih Toko Cabang <span class="text-danger">*</span></label>
-                            <select class="form-select @error('toko_id') is-invalid @enderror" id="toko_id" name="toko_id">
+                        <div x-show="role === 'admin_toko'" style="display: none;">
+                            <label class="block text-sm font-medium text-gray-700">Pilih Toko Cabang <span class="text-red-500">*</span></label>
+                            <select name="toko_id" x-bind:required="role === 'admin_toko'" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm">
                                 <option value="">-- Pilih Toko --</option>
                                 @foreach($tokos as $toko)
                                     <option value="{{ $toko->id }}" {{ old('toko_id', $user->toko_id ?? '') == $toko->id ? 'selected' : '' }}>
@@ -68,38 +60,20 @@
                                     </option>
                                 @endforeach
                             </select>
-                            @error('toko_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
                         </div>
                     </div>
+                </div>
 
-                    <div class="d-flex justify-content-end gap-2">
-                        <a href="{{ route('users.index') }}" class="btn btn-light border"><i class="fas fa-arrow-left me-1"></i> Kembali</a>
-                        <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Simpan</button>
-                    </div>
-                </form>
-            </div>
+                <div class="mt-8 flex justify-end gap-3 pt-5 border-t border-gray-100">
+                    <a href="{{ route('users.index') }}" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-arrow-left mr-2 mt-1"></i> Kembali
+                    </a>
+                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-brand-600 hover:bg-brand-700 transition-colors">
+                        <i class="fas fa-save mr-2 mt-1"></i> Simpan
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-
-@push('scripts')
-<script>
-    function toggleToko(role) {
-        if(role === 'admin_toko') {
-            document.getElementById('toko_wrapper').style.display = 'block';
-            document.getElementById('toko_id').required = true;
-        } else {
-            document.getElementById('toko_wrapper').style.display = 'none';
-            document.getElementById('toko_id').required = false;
-            document.getElementById('toko_id').value = '';
-        }
-    }
-    // Initialize on load if there's a selected role
-    window.onload = function() {
-        toggleToko(document.getElementById('role').value);
-    }
-</script>
-@endpush
 @endsection

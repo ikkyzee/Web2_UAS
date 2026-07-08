@@ -20,7 +20,8 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        return view('auth.register');
+        $tokos = \App\Models\Toko::orderBy('nama_toko')->get();
+        return view('auth.register', compact('tokos'));
     }
 
     /**
@@ -34,12 +35,25 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'role' => ['required', 'in:admin_pusat,admin_toko'],
+            'toko_id' => ['nullable', 'exists:tokos,id', 'required_if:role,admin_toko'],
+        ], [
+            'email.unique' => 'Alamat email ini sudah terdaftar. Silakan gunakan email lain.',
         ]);
+
+        $photoPath = null;
+        if ($request->hasFile('photo')) {
+            $photoPath = $request->file('photo')->store('profiles', 'public');
+        }
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'photo' => $photoPath,
+            'role' => $request->role,
+            'toko_id' => $request->role === 'admin_toko' ? $request->toko_id : null,
         ]);
 
         event(new Registered($user));

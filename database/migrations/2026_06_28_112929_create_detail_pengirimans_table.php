@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('detail_pengirimans', function (Blueprint $table) {
             $table->id();
             $table->foreignId('pengiriman_id')->constrained('pengirimans')->cascadeOnDelete();
-            $table->foreignId('roll_id')->constrained('rolls')->cascadeOnDelete();
+            $table->foreignId('barang_id')->constrained('barangs')->cascadeOnDelete(); // 1 barang = 1 roll
             $table->timestamps();
         });
     }

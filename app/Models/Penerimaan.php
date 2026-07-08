@@ -9,23 +9,26 @@ class Penerimaan extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'supplier_id',
-        'tanggal_masuk',
-        'kode_batch',
-    ];
-
-    protected $casts = [
-        'tanggal_masuk' => 'date',
-    ];
+    protected $table = 'penerimaans';
+    protected $guarded = ['id'];
 
     public function supplier()
     {
         return $this->belongsTo(Supplier::class);
     }
 
-    public function rolls()
+    public function penerimaanRolls()
     {
-        return $this->hasMany(Roll::class);
+        return $this->hasMany(PenerimaanRoll::class);
+    }
+
+    public function barangs()
+    {
+        return $this->hasMany(Barang::class);
+    }
+
+    public function kategori()
+    {
+        return $this->belongsTo(Kategori::class);
     }
 }

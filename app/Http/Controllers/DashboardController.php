@@ -19,10 +19,24 @@ class DashboardController extends Controller
             'total_pengiriman' => Pengiriman::count(),
         ];
 
-        // Dummy Data untuk Chart: Tren "Total Pengiriman per Bulan"
+        // Data untuk Chart: Tren "Total Pengiriman per Bulan" (6 bulan terakhir)
+        $chartLabels = [];
+        $chartValues = [];
+        
+        for ($i = 5; $i >= 0; $i--) {
+            $date = \Carbon\Carbon::now()->subMonths($i);
+            $chartLabels[] = $date->translatedFormat('M Y'); // e.g. "Jul 2026"
+            
+            $count = Pengiriman::whereYear('tanggal_kirim', $date->year)
+                        ->whereMonth('tanggal_kirim', $date->month)
+                        ->count();
+                        
+            $chartValues[] = $count;
+        }
+
         $chartData = [
-            'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'],
-            'data' => [15, 22, 18, 30, 25, 40]
+            'labels' => $chartLabels,
+            'data' => $chartValues
         ];
 
         return view('dashboard.index', compact('widgets', 'chartData'));

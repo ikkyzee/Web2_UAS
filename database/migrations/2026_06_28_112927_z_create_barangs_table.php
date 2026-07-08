@@ -10,11 +10,12 @@ return new class extends Migration
     {
         Schema::create('barangs', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('penerimaan_id')->constrained('penerimaans')->cascadeOnDelete();
+            $table->foreignId('penerimaan_roll_id')->unique()->constrained('penerimaan_rolls')->cascadeOnDelete();
             $table->foreignId('kategori_id')->constrained('kategoris')->cascadeOnDelete();
             $table->string('kode_barang')->unique();
-            $table->string('nama_barang');
-            $table->enum('ukuran', ['16s', '20s', '24s', '30s', '40s']);
             $table->string('warna');
+            $table->enum('status', ['di_gudang', 'dikirim'])->default('di_gudang');
             $table->timestamps();
         });
     }

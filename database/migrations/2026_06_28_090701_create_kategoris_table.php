@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('kategoris', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_kategori');
+            $table->string('nama_kategori'); // sudah mencakup jenis dan ukuran, misal: "Cotton 30s"
             $table->text('deskripsi')->nullable();
             $table->timestamps();
         });

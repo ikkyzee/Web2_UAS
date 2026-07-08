@@ -2,17 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Kategori extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nama_kategori', 'deskripsi'];
+    protected $guarded = ['id'];
 
-    public function barangs()
+    public function penerimaans()
     {
-        return $this->hasMany(Barang::class);
+        return $this->hasMany(Penerimaan::class);
     }
 }

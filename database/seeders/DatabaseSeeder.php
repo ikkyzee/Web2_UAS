@@ -6,153 +6,149 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\Toko;
-use App\Models\Kategori;
 use App\Models\Armada;
+use App\Models\Kategori;
+use App\Models\Supplier;
+use App\Models\Penerimaan;
+use App\Models\PenerimaanRoll;
 use App\Models\Barang;
 use App\Models\Pengiriman;
 use App\Models\DetailPengiriman;
-use Faker\Factory as Faker;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        $faker = Faker::create('id_ID');
+        // 1. Data Toko
+        $toko1 = Toko::create([
+            'nama_toko' => 'Toko Pusat Tanah Abang',
+            'alamat_toko' => 'Blok A Lt. 1 Los B No. 45, Jakarta Pusat'
+        ]);
 
-        // 1. Buat 20 Toko
-        $tokos = [];
-        for ($i = 0; $i < 20; $i++) {
-            $tokos[] = Toko::create([
-                'nama_toko' => 'Toko ' . $faker->company,
-                'alamat_toko' => $faker->address,
-            ]);
-        }
+        $toko2 = Toko::create([
+            'nama_toko' => 'Toko Cabang Cipadu',
+            'alamat_toko' => 'Kawasan Tekstil Cipadu, Tangerang'
+        ]);
 
-        // 2. Buat Admin User (Pusat) & 20 Admin Toko
+        // 2. Data Users
         User::create([
-            'name' => 'Admin Pusat',
-            'email' => 'admin@karunia.com',
+            'name' => 'Administrator Gudang',
+            'email' => 'admin@karuniatex.com',
             'password' => Hash::make('password'),
             'role' => 'admin',
         ]);
-        
+
         User::create([
-            'name' => 'Petugas Gudang',
-            'email' => 'petugas@karunia.com',
+            'name' => 'Petugas Lapangan',
+            'email' => 'admin_pusat@karuniatex.com',
             'password' => Hash::make('password'),
-            'role' => 'petugas',
+            'role' => 'admin_pusat',
         ]);
 
-        $users = [];
-        foreach ($tokos as $toko) {
-            $users[] = User::create([
-                'name' => 'Admin ' . $toko->nama_toko,
-                'email' => $faker->unique()->safeEmail,
-                'password' => Hash::make('password'),
-                'toko_id' => $toko->id,
-                'role' => 'admin_toko',
-            ]);
-        }
+        User::create([
+            'name' => 'Admin Toko Tanah Abang',
+            'email' => 'toko1@karuniatex.com',
+            'password' => Hash::make('password'),
+            'role' => 'admin_toko',
+            'toko_id' => $toko1->id
+        ]);
 
-        // 3. Buat 20 Kategori
-        $kategoris = [];
-        for ($i = 0; $i < 20; $i++) {
-            $kategoris[] = Kategori::create([
-                'nama_kategori' => 'Kategori ' . $faker->word,
-                'deskripsi' => $faker->sentence,
-            ]);
-        }
+        // 3. Data Armada
+        $armada1 = Armada::create([
+            'plat_nomor' => 'B 1234 CD',
+            'jenis_kendaraan' => 'Truk Engkel',
+            'nama_supir' => 'Budi Santoso'
+        ]);
+        
+        $armada2 = Armada::create([
+            'plat_nomor' => 'B 5678 EF',
+            'jenis_kendaraan' => 'Mobil Box',
+            'nama_supir' => 'Ahmad'
+        ]);
 
-        // 4. Buat 20 Armada
-        $armadas = [];
-        for ($i = 0; $i < 20; $i++) {
-            $armadas[] = Armada::create([
-                'plat_nomor' => strtoupper($faker->bothify('D #### ??')),
-                'jenis_kendaraan' => $faker->randomElement(['Engkel', 'Box', 'Fuso', 'Blind Van']),
-                'nama_supir' => $faker->name,
-            ]);
-        }
+        // 4. Data Supplier
+        $supplier1 = Supplier::create([
+            'nama_supplier' => 'PT Makmur Jaya Tekstil',
+            'kontak_person' => 'Pak Andi',
+            'no_telepon' => '081234567890',
+            'alamat' => 'Kawasan Industri Majalaya, Bandung'
+        ]);
 
-        // 5. Buat 20 Barang
-        $barangs = [];
-        $ukuranEnum = ['16s', '20s', '24s', '30s', '40s'];
-        for ($i = 0; $i < 20; $i++) {
-            $barangs[] = Barang::create([
-                'kategori_id' => $kategoris[array_rand($kategoris)]->id,
-                'kode_barang' => strtoupper($faker->unique()->bothify('BRG-#####')),
-                'nama_barang' => 'Kain ' . $faker->colorName,
-                'ukuran' => $faker->randomElement($ukuranEnum),
-                'warna' => $faker->colorName,
-            ]);
-        }
+        // 5. Data Kategori (Jenis)
+        $kat1 = Kategori::create([
+            'nama_kategori' => 'Cotton Combed 30s',
+            'deskripsi' => 'Bahan katun standar distro'
+        ]);
+        
+        $kat2 = Kategori::create([
+            'nama_kategori' => 'Fleece PE',
+            'deskripsi' => 'Bahan jaket standar'
+        ]);
 
-        // 6. Buat Supplier
-        $suppliers = [];
-        for ($i = 0; $i < 10; $i++) {
-            $suppliers[] = \App\Models\Supplier::create([
-                'nama_supplier' => $faker->company,
-                'kontak_person' => $faker->name,
-                'no_telepon' => $faker->phoneNumber,
-                'alamat' => $faker->address,
-            ]);
-        }
+        // 6. Data Penerimaan (Staging Inbound) - OC-001
+        $penerimaan1 = Penerimaan::create([
+            'supplier_id' => $supplier1->id,
+            'tanggal_masuk' => '2026-07-01',
+            'kode_oc' => 'OC-001',
+            'kategori_id' => $kat1->id,
+            'warna' => 'Merah Cabe'
+        ]);
 
-        // 7. Buat Penerimaan dan Rolls
-        $rolls = [];
-        for ($i = 0; $i < 30; $i++) {
-            $penerimaan = \App\Models\Penerimaan::create([
-                'supplier_id' => $suppliers[array_rand($suppliers)]->id,
-                'tanggal_masuk' => $faker->dateTimeBetween('-2 months', '-1 week')->format('Y-m-d'),
-                'kode_batch' => strtoupper($faker->unique()->bothify('BATCH-#####')),
-            ]);
+        // 7. Data Rolls Fisik untuk OC-001
+        $roll1 = PenerimaanRoll::create(['penerimaan_id' => $penerimaan1->id, 'nomor_roll' => 'R-001-A', 'kiloan' => 25.40, 'is_cataloged' => true]);
+        $roll2 = PenerimaanRoll::create(['penerimaan_id' => $penerimaan1->id, 'nomor_roll' => 'R-001-B', 'kiloan' => 25.10, 'is_cataloged' => true]);
+        $roll3 = PenerimaanRoll::create(['penerimaan_id' => $penerimaan1->id, 'nomor_roll' => 'R-001-C', 'kiloan' => 24.90, 'is_cataloged' => true]);
 
-            $jumlahRoll = rand(3, 10);
-            for ($j = 0; $j < $jumlahRoll; $j++) {
-                $rolls[] = \App\Models\Roll::create([
-                    'penerimaan_id' => $penerimaan->id,
-                    'barang_id' => $barangs[array_rand($barangs)]->id,
-                    'nomor_roll' => strtoupper($faker->unique()->bothify('R-########')),
-                    'berat_kg' => $faker->randomFloat(2, 20, 35),
-                    'status' => 'di_gudang',
-                ]);
-            }
-        }
+        // 8. Data Barang (Katalog) untuk OC-001 (1 Barang = 1 Roll)
+        $barang1 = Barang::create([
+            'penerimaan_id' => $penerimaan1->id,
+            'penerimaan_roll_id' => $roll1->id,
+            'kategori_id' => $kat1->id,
+            'kode_barang' => 'CTN-30-MRH-01',
+            'warna' => 'Merah Cabe',
+            'status' => 'di_gudang'
+        ]);
+        $barang2 = Barang::create([
+            'penerimaan_id' => $penerimaan1->id,
+            'penerimaan_roll_id' => $roll2->id,
+            'kategori_id' => $kat1->id,
+            'kode_barang' => 'CTN-30-MRH-02',
+            'warna' => 'Merah Cabe',
+            'status' => 'di_gudang'
+        ]);
+        $barang3 = Barang::create([
+            'penerimaan_id' => $penerimaan1->id,
+            'penerimaan_roll_id' => $roll3->id,
+            'kategori_id' => $kat1->id,
+            'kode_barang' => 'CTN-30-MRH-03',
+            'warna' => 'Merah Cabe',
+            'status' => 'dikirim' // Sudah dikirim
+        ]);
 
-        // 8. Buat Pengiriman beserta detailnya
-        $statusEnum = ['diproses', 'dikirim', 'diterima'];
-        for ($i = 0; $i < 20; $i++) {
-            $pengiriman = Pengiriman::create([
-                'user_id' => User::where('role', 'petugas')->first()->id,
-                'toko_id' => $tokos[array_rand($tokos)]->id,
-                'armada_id' => $armadas[array_rand($armadas)]->id,
-                'tanggal_kirim' => $faker->dateTimeBetween('-1 week', 'now')->format('Y-m-d'),
-                'tanggal_diterima' => $faker->optional(0.7)->dateTimeBetween('-1 week', 'now'),
-                'status' => $faker->randomElement($statusEnum),
-            ]);
+        // OC-002 (Belum dikatalogkan, murni staging)
+        $penerimaan2 = Penerimaan::create([
+            'supplier_id' => $supplier1->id,
+            'tanggal_masuk' => '2026-07-05',
+            'kode_oc' => 'OC-002',
+            'kategori_id' => $kat2->id,
+            'warna' => 'Hitam Pekat'
+        ]);
+        PenerimaanRoll::create(['penerimaan_id' => $penerimaan2->id, 'nomor_roll' => 'FL-002-A', 'kiloan' => 30.00, 'is_cataloged' => false]);
+        PenerimaanRoll::create(['penerimaan_id' => $penerimaan2->id, 'nomor_roll' => 'FL-002-B', 'kiloan' => 29.50, 'is_cataloged' => false]);
 
-            // Pilih beberapa roll yang masih di gudang
-            $availableRolls = array_filter($rolls, function($r) {
-                return $r->status === 'di_gudang';
-            });
-            $availableRolls = array_values($availableRolls); // Re-index
+        // 9. Data Pengiriman (Outbound) menggunakan $barang3
+        $pengiriman1 = Pengiriman::create([
+            'user_id' => 1,
+            'toko_id' => $toko1->id,
+            'armada_id' => $armada1->id,
+            'tanggal_kirim' => '2026-07-06',
+            'status' => 'dikirim'
+        ]);
 
-            if(count($availableRolls) > 0) {
-                $jumlahBarang = min(rand(1, 5), count($availableRolls));
-                $selectedKeys = (array) array_rand($availableRolls, $jumlahBarang);
-                foreach ($selectedKeys as $key) {
-                    $roll = $availableRolls[$key];
-                    DetailPengiriman::create([
-                        'pengiriman_id' => $pengiriman->id,
-                        'roll_id' => $roll->id,
-                    ]);
-                    // Update status roll secara lokal dan database
-                    $roll->update(['status' => 'dikirim']);
-                    $roll->status = 'dikirim';
-                }
-            }
-        }
+        // 10. Data Detail Pengiriman
+        DetailPengiriman::create([
+            'pengiriman_id' => $pengiriman1->id,
+            'barang_id' => $barang3->id
+        ]);
     }
 }

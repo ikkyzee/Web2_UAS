@@ -1,162 +1,185 @@
 @extends('layouts.app')
 
 @section('title', 'Buat Pengiriman - KT Inventory')
-@section('page_heading', 'Buat Pengiriman Baru')
+@section('page_heading', 'Buat Pengiriman Baru (Outbound)')
 
 @section('content')
-<div class="row">
-    <div class="col-md-12">
-        <div class="card shadow-sm border-0">
-            <div class="card-body p-4">
-                <form action="{{ route('pengirimans.store') }}" method="POST">
-                    @csrf
-                    
-                    <h5 class="border-bottom pb-2 mb-4 text-primary">Informasi Pengiriman</h5>
-                    
-                    <div class="row mb-4">
-                        <div class="col-md-4">
-                            <label for="tanggal_kirim" class="form-label fw-bold">Tanggal Kirim <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control @error('tanggal_kirim') is-invalid @enderror" id="tanggal_kirim" name="tanggal_kirim" value="{{ old('tanggal_kirim', date('Y-m-d')) }}" required>
-                            @error('tanggal_kirim') <div class="invalid-feedback">{{ $message }}</div> @enderror
+<div class="max-w-6xl">
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 overflow-hidden">
+        <form action="{{ route('pengirimans.store') }}" method="POST">
+            @csrf
+            
+            <div class="p-6">
+                <div class="bg-amber-50 border-l-4 border-amber-500 p-4 mb-8 rounded-r-md">
+                    <div class="flex">
+                        <div class="flex-shrink-0"><i class="fas fa-truck text-amber-500 mt-0.5"></i></div>
+                        <div class="ml-3">
+                            <p class="text-sm text-amber-800">
+                                <strong>Fase Outbound:</strong> Pilih barang (yang mewakili 1 Roll fisik) yang akan dikirim secara spesifik dari katalog.
+                            </p>
                         </div>
-                        <div class="col-md-4">
-                            <label for="toko_id" class="form-label fw-bold">Toko Tujuan <span class="text-danger">*</span></label>
-                            <select class="form-select @error('toko_id') is-invalid @enderror" id="toko_id" name="toko_id" required>
-                                <option value="">-- Pilih Toko --</option>
-                                @foreach($tokos as $toko)
-                                    <option value="{{ $toko->id }}">{{ $toko->nama_toko }} ({{ str()->limit($toko->alamat_toko, 30) }})</option>
-                                @endforeach
-                            </select>
-                            @error('toko_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-4">
-                            <label for="armada_id" class="form-label fw-bold">Armada Kendaraan <span class="text-danger">*</span></label>
-                            <select class="form-select @error('armada_id') is-invalid @enderror" id="armada_id" name="armada_id" required>
-                                <option value="">-- Pilih Armada --</option>
-                                @foreach($armadas as $armada)
-                                    <option value="{{ $armada->id }}">{{ $armada->plat_nomor }} - {{ $armada->jenis_kendaraan }} ({{ $armada->nama_supir }})</option>
-                                @endforeach
-                            </select>
-                            @error('armada_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                </div>
+
+                <h5 class="text-base font-bold text-gray-900 mb-4 border-b pb-2">Informasi Pengiriman</h5>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Kirim <span class="text-red-500">*</span></label>
+                        <input type="date" name="tanggal_kirim" value="{{ old('tanggal_kirim', date('Y-m-d')) }}" required class="block w-full border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm {{ $errors->has('tanggal_kirim') ? 'border-red-500' : '' }}">
+                        @error('tanggal_kirim') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Toko Tujuan <span class="text-red-500">*</span></label>
+                        <select name="toko_id" required class="block w-full border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm {{ $errors->has('toko_id') ? 'border-red-500' : '' }}">
+                            <option value="">-- Pilih Toko --</option>
+                            @foreach($tokos as $toko)
+                                <option value="{{ $toko->id }}">{{ $toko->nama_toko }} ({{ str()->limit($toko->alamat_toko, 30) }})</option>
+                            @endforeach
+                        </select>
+                        @error('toko_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Armada Kendaraan <span class="text-red-500">*</span></label>
+                        <select name="armada_id" required class="block w-full border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm {{ $errors->has('armada_id') ? 'border-red-500' : '' }}">
+                            <option value="">-- Pilih Armada --</option>
+                            @foreach($armadas as $armada)
+                                <option value="{{ $armada->id }}">{{ $armada->plat_nomor }} - {{ $armada->jenis_kendaraan }} ({{ $armada->nama_supir }})</option>
+                            @endforeach
+                        </select>
+                        @error('armada_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+
+                <div x-data="pengirimanForm()">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-gray-200 pb-3 mb-4 gap-4">
+                        <h5 class="text-base font-bold text-brand-600 mb-0">Pilih Barang (Checkbox)</h5>
+                        <div class="relative w-full sm:w-64">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </div>
+                            <input type="text" x-model="searchQuery" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-brand-500 focus:border-brand-500 sm:text-sm transition duration-150 ease-in-out" placeholder="Cari kode/nomor roll...">
                         </div>
                     </div>
 
-                    <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
-                        <h5 class="text-primary mb-0">Pilih Roll Barang (Outbound)</h5>
-                        <div class="input-group w-25">
-                            <input type="text" class="form-control form-control-sm" id="searchInput" placeholder="Cari kode/nomor roll...">
-                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden mb-6">
+                        <div class="overflow-x-auto max-h-[400px] overflow-y-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50 sticky top-0 z-10 shadow-sm">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
+                                            <input type="checkbox" x-model="selectAll" @change="toggleAll" class="h-4 w-4 text-brand-600 focus:ring-brand-500 border-gray-300 rounded cursor-pointer">
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode Barang</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nomor Roll</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode Batch</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis / Kategori</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Warna</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kiloan (Kg)</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <template x-for="item in filteredItems" :key="item.id">
+                                        <tr class="hover:bg-brand-50 cursor-pointer transition-colors" @click="toggleItem(item.id)">
+                                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                                <input type="checkbox" name="barang_id[]" :value="item.id" x-model="selectedItems" @click.stop class="h-4 w-4 text-brand-600 focus:ring-brand-500 border-gray-300 rounded cursor-pointer">
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-brand-600" x-text="item.kode_barang"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900" x-text="item.nomor_roll"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="item.kode_oc"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" x-text="item.kategori"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="item.warna"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-700" x-text="item.kiloan"></td>
+                                        </tr>
+                                    </template>
+                                    <tr x-show="filteredItems.length === 0">
+                                        <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                                            <p x-text="items.length === 0 ? 'Tidak ada barang yang terdaftar di katalog dan tersedia di gudang.' : 'Tidak ada barang yang cocok dengan pencarian.'"></p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
-                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                        <table class="table table-hover align-middle table-sm" id="rollTable">
-                            <thead class="table-light sticky-top">
-                                <tr>
-                                    <th width="5%" class="text-center">
-                                        <input class="form-check-input" type="checkbox" id="checkAll">
-                                    </th>
-                                    <th width="20%">Nomor Roll</th>
-                                    <th width="30%">Nama Barang</th>
-                                    <th width="15%">Kategori</th>
-                                    <th width="15%">Warna/Ukuran</th>
-                                    <th width="15%">Berat (Kg)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($rolls as $roll)
-                                <tr>
-                                    <td class="text-center">
-                                        <input class="form-check-input roll-checkbox" type="checkbox" name="roll_id[]" value="{{ $roll->id }}">
-                                    </td>
-                                    <td class="fw-bold text-primary">{{ $roll->nomor_roll }}</td>
-                                    <td>{{ $roll->barang->kode_barang }} - {{ $roll->barang->nama_barang }}</td>
-                                    <td>{{ $roll->barang->kategori->nama_kategori ?? '-' }}</td>
-                                    <td>{{ $roll->barang->warna }} / {{ $roll->barang->ukuran }}</td>
-                                    <td>{{ number_format($roll->berat_kg, 2) }}</td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="6" class="text-center text-muted py-3">Tidak ada roll barang yang tersedia di gudang.</td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div class="text-sm text-gray-600">
+                            Total Barang Dipilih: <span class="font-bold text-lg text-brand-600 ml-1" x-text="selectedItems.length"></span> barang
+                        </div>
+                        <div class="flex gap-3 w-full sm:w-auto">
+                            <a href="{{ route('pengirimans.index') }}" class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-arrow-left mr-2"></i> Batal
+                            </a>
+                            <button type="submit" :disabled="selectedItems.length === 0" class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                <i class="fas fa-paper-plane mr-2"></i> Proses Pengiriman
+                            </button>
+                        </div>
                     </div>
-
-                    <div class="mt-2 text-muted small">
-                        Total dipilih: <span id="selectedCount" class="fw-bold">0</span> roll
-                    </div>
-
-                    <div class="d-flex justify-content-end gap-2 mt-4">
-                        <a href="{{ route('pengirimans.index') }}" class="btn btn-light border"><i class="fas fa-arrow-left me-1"></i> Batal</a>
-                        <button type="submit" class="btn btn-primary" id="btnSubmit" disabled><i class="fas fa-paper-plane me-1"></i> Proses Pengiriman</button>
-                    </div>
-                </form>
+                </div>
             </div>
-        </div>
+        </form>
     </div>
 </div>
 
 @push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('searchInput');
-        const checkAll = document.getElementById('checkAll');
-        const checkboxes = document.querySelectorAll('.roll-checkbox');
-        const selectedCount = document.getElementById('selectedCount');
-        const btnSubmit = document.getElementById('btnSubmit');
-
-        // Live Search
-        searchInput.addEventListener('input', function() {
-            const filter = this.value.toLowerCase();
-            const rows = document.querySelectorAll('#rollTable tbody tr');
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('pengirimanForm', () => ({
+            searchQuery: '',
+            selectAll: false,
+            selectedItems: [],
+            items: [
+                @foreach($barangs as $barang)
+                {
+                    id: '{{ $barang->id }}',
+                    kode_barang: '{{ $barang->kode_barang }}',
+                    nomor_roll: '{{ $barang->penerimaanRoll->nomor_roll ?? '-' }}',
+                    kode_oc: '{{ $barang->penerimaan->kode_oc ?? '-' }}',
+                    kategori: '{{ $barang->kategori->nama_kategori ?? '-' }}',
+                    warna: '{{ $barang->warna }}',
+                    kiloan: '{{ number_format($barang->penerimaanRoll->kiloan ?? 0, 2) }}',
+                    searchString: '{{ strtolower($barang->kode_barang . ' ' . ($barang->penerimaanRoll->nomor_roll ?? '') . ' ' . ($barang->penerimaan->kode_oc ?? '')) }}'
+                },
+                @endforeach
+            ],
             
-            rows.forEach(row => {
-                if(row.children.length > 1) { // Abaikan row empty state
-                    const text = row.textContent.toLowerCase();
-                    if(text.includes(filter)) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
+            get filteredItems() {
+                if (this.searchQuery === '') {
+                    return this.items;
                 }
-            });
-        });
-
-        // Check/Uncheck All (Hanya yang terlihat)
-        checkAll.addEventListener('change', function() {
-            const isChecked = this.checked;
-            const rows = document.querySelectorAll('#rollTable tbody tr');
+                const query = this.searchQuery.toLowerCase();
+                return this.items.filter(item => item.searchString.includes(query));
+            },
             
-            rows.forEach(row => {
-                if(row.style.display !== 'none' && row.children.length > 1) {
-                    const cb = row.querySelector('.roll-checkbox');
-                    if(cb) cb.checked = isChecked;
+            toggleAll() {
+                if (this.selectAll) {
+                    this.selectedItems = this.filteredItems.map(item => item.id);
+                } else {
+                    this.selectedItems = [];
                 }
-            });
-            updateCount();
-        });
-
-        // Update Count on individual checkbox change
-        checkboxes.forEach(cb => {
-            cb.addEventListener('change', updateCount);
-        });
-
-        function updateCount() {
-            const checkedCount = document.querySelectorAll('.roll-checkbox:checked').length;
-            selectedCount.textContent = checkedCount;
-            btnSubmit.disabled = checkedCount === 0;
+            },
             
-            // Update checkAll status
-            const visibleCheckboxes = Array.from(document.querySelectorAll('#rollTable tbody tr')).filter(row => row.style.display !== 'none' && row.children.length > 1).map(row => row.querySelector('.roll-checkbox'));
-            const allVisibleChecked = visibleCheckboxes.length > 0 && visibleCheckboxes.every(cb => cb.checked);
-            const someVisibleChecked = visibleCheckboxes.some(cb => cb.checked);
+            toggleItem(id) {
+                const index = this.selectedItems.indexOf(id);
+                if (index > -1) {
+                    this.selectedItems.splice(index, 1);
+                } else {
+                    this.selectedItems.push(id);
+                }
+            },
             
-            checkAll.checked = allVisibleChecked;
-            checkAll.indeterminate = someVisibleChecked && !allVisibleChecked;
-        }
-    });
+            init() {
+                this.$watch('selectedItems', value => {
+                    this.selectAll = this.filteredItems.length > 0 && value.length === this.filteredItems.length;
+                });
+                
+                this.$watch('searchQuery', () => {
+                    this.selectAll = false;
+                    // Optionally clear selection on search, or keep it. Keeping it is better UX.
+                });
+            }
+        }))
+    })
 </script>
 @endpush
 @endsection

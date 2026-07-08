@@ -2,64 +2,70 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Barang;
+use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\LaporanStokExport;
 
 class LaporanController extends Controller
 {
-    public function stok(Request $request)
+    public function index(Request $request)
     {
-        $search = $request->search;
-        $barangs = Barang::with('kategori')
-            ->when($search, function ($query, $search) {
-                return $query->where('nama_barang', 'like', "%{$search}%")
-                             ->orWhere('kode_barang', 'like', "%{$search}%")
-                             ->orWhereHas('kategori', function ($q) use ($search) {
-                                 $q->where('nama_kategori', 'like', "%{$search}%");
-                             });
-            })
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
-            
-        return view('laporan.stok', compact('barangs', 'search'));
+        $status = $request->status;
+
+        if (auth()->check() && auth()->user()->role === 'admin_toko') {
+            $status = 'di_gudang'; // Force to di_gudang for admin_toko
+        }
+
+        $query = Barang::with(['penerimaan', 'penerimaanRoll', 'kategori']);
+
+        if ($status === 'di_gudang') {
+            $query->where('status', 'di_gudang');
+        } elseif ($status === 'dikirim') {
+            $query->where('status', 'dikirim')->with('detailPengirimans.pengiriman.toko');
+        } else {
+            // Jika Semua Data, ambil juga detail pengiriman untuk yang statusnya dikirim
+            $query->with('detailPengirimans.pengiriman.toko');
+        }
+
+        $barangs = $query->latest()->get();
+
+        return view('laporan.index', compact('barangs', 'status'));
     }
 
-    public function exportStokCsv()
+    public function exportPdf(Request $request)
     {
-        $barangs = Barang::with('kategori')->orderBy('nama_barang')->get();
+        $status = $request->status;
         
-        $filename = "Laporan_Stok_Barang_" . date('Y-m-d') . ".csv";
-        $headers = [
-            "Content-type"        => "text/csv",
-            "Content-Disposition" => "attachment; filename=$filename",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
-        ];
+        if (auth()->check() && auth()->user()->role === 'admin_toko') {
+            $status = 'di_gudang'; // Force to di_gudang for admin_toko
+        }
+
+        $query = Barang::with(['penerimaan', 'penerimaanRoll', 'kategori']);
+
+        if ($status === 'di_gudang') {
+            $query->where('status', 'di_gudang');
+        } elseif ($status === 'dikirim') {
+            $query->where('status', 'dikirim')->with('detailPengirimans.pengiriman.toko');
+        } else {
+            $query->with('detailPengirimans.pengiriman.toko');
+        }
+
+        $barangs = $query->latest()->get();
+
+        $pdf = Pdf::loadView('laporan.pdf', compact('barangs', 'status'))->setPaper('a4', 'landscape');
+        return $pdf->download('Laporan_Stok_Barang_' . date('Y-m-d') . '.pdf');
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $status = $request->status;
         
-        $columns = ['No', 'Kode Barang', 'Kategori', 'Nama Barang', 'Ukuran', 'Warna', 'Sisa Stok (Kg)'];
-        
-        $callback = function() use($barangs, $columns) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $columns);
-            
-            $no = 1;
-            foreach ($barangs as $barang) {
-                $row = [
-                    $no++,
-                    $barang->kode_barang,
-                    $barang->kategori->nama_kategori ?? '-',
-                    $barang->nama_barang,
-                    $barang->ukuran,
-                    $barang->warna,
-                    $barang->stok_kiloan
-                ];
-                fputcsv($file, $row);
-            }
-            fclose($file);
-        };
-        
-        return response()->stream($callback, 200, $headers);
+        if (auth()->check() && auth()->user()->role === 'admin_toko') {
+            $status = 'di_gudang'; // Force to di_gudang for admin_toko
+        }
+
+        return Excel::download(new LaporanStokExport($status), 'Laporan_Stok_Barang_' . date('Y-m-d') . '.xlsx');
     }
 }
